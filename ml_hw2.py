@@ -125,11 +125,11 @@ plt.ylabel('No of Training data')
 plt.xlim([-1, 43])
 
 #plt.show()
-#print(X_train_final)
-#print(X_train_final.size)
-#print(X_train_final.shape)
-#standard normalization & mean max normalization
-#print(X_train_final.shape)
-X_train_final[0][:,:,0]=sklearn.preprocessing.normalize(X_train_final[0][:,:,0], return_norm=False)
-print(X_train_final[0][:,:,0])
-print(X_train_final.shape[0][:,:,0])
+
+#normalize my data
+for i in X_train_final:
+    i = i*(1/225)
+
+
+
+
