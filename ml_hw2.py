@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 import cv2 as cv
+import sklearn as sklearn
+from sklearn import preprocessing
 from PIL import Image
 import random
 def readTrafficSigns(rootpath):
@@ -53,3 +55,81 @@ random.shuffle(images)
 #Spliting our data
 train_set=images[ :int(len(images)*0.8)]
 test_set=images[int(len(images)*0.8): ]
+train_set_np=np.asarray(train_set)
+#start plotting y data
+unique_elements, counts_elements = np.unique(labels, return_counts = True)
+#print(np.asarray((unique_elements, counts_elements)))
+
+#plot my data after spliting
+plt.bar( np.arange( 43 ), counts_elements, align='center',color='blue' )
+plt.xlabel('Class')
+plt.ylabel('No of Training data')
+plt.xlim([-1, 43])
+#plt.show()
+
+#data_augmentaion
+def data_augment(image):
+    rows = image.shape[0]
+    cols = image.shape[1]
+
+    # rotation
+    M_rot = cv.getRotationMatrix2D((cols / 2, rows / 2), 10, 1)
+
+    # Translation
+    M_trans = np.float32([[1, 0, 3], [0, 1, 6]])
+
+    img = cv.warpAffine(image, M_rot, (cols, rows))
+    img = cv.warpAffine(img, M_trans, (cols, rows))
+    # img = cv2.warpAffine(img,M_aff,(cols,rows))
+
+    # Bilateral filtering
+    img = cv.bilateralFilter(img, 9, 75, 75)
+    return img
+
+classes = 43
+labels=np.asarray(labels, dtype=np.int)
+images=np.asarray(images)
+X_train_final = train_set
+y_train_final = labels
+X_aug_1 = []
+Y_aug_1 = []
+#print(labels)
+for i in range(0, classes):
+
+    class_records = np.asarray(np.where(labels == i)).size
+    max_records = 3000
+    if class_records != max_records:
+        ovr_sample = max_records - class_records
+        samples = images[np.where(labels == i)[0]]
+        X_aug = []
+        Y_aug = [i] * ovr_sample
+
+        for x in range(ovr_sample):
+            img = samples[x % class_records]
+            trans_img = data_augment(img)
+            X_aug.append(trans_img)
+
+        X_train_final = np.concatenate((X_train_final, X_aug), axis=0)
+        y_train_final = np.concatenate((y_train_final, Y_aug))
+
+        Y_aug_1 = Y_aug_1 + Y_aug
+        X_aug_1 = X_aug_1 + X_aug
+
+#plotting the data after agumentaion
+unique_elements, counts_elements = np.unique(y_train_final, return_counts = True)
+#print(np.asarray((unique_elements, counts_elements)))
+
+plt.bar( np.arange( 43 ), counts_elements, align='center',color='green' )
+plt.xlabel('Class')
+plt.ylabel('No of Training data')
+plt.xlim([-1, 43])
+
+#plt.show()
+#print(X_train_final)
+#print(X_train_final.size)
+#print(X_train_final.shape)
+#standard normalization & mean max normalization
+#print(X_train_final.shape)
+X_train_final[0][:,:,0]=sklearn.preprocessing.normalize(X_train_final[0][:,:,0], return_norm=False)
+print(X_train_final[0][:,:,0])
+print(X_train_final.shape[0][:,:,0])
