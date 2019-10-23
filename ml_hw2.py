@@ -45,7 +45,9 @@ for i in range(len(images)):
             images[i] = cv.copyMakeBorder(images[i], int(d/2), int(d/2), 0, 0, cv.BORDER_REPLICATE)
         else:
             images[i] = cv.copyMakeBorder(images[i], int((d - 1)/2), int(((d - 1)/2)+1), 0, 0, cv.BORDER_REPLICATE)
-    #images[i]=np.resize(images[i],(30,30,3))
+
+
+    #images[i]=cv.resize(images[i],(30,30))
 
 #plt.imshow(images[18])
 #plt.show()
@@ -130,6 +132,35 @@ plt.xlim([-1, 43])
 for i in X_train_final:
     i = i*(1/225)
 
+#building our network
+#Dependencies
+import keras
+from keras.models import Sequential
+from keras.layers import Dense
+model = Sequential()
+#input_dim=batch_size*30*30
+model.add(Dense(150, input_dim=30*30*1000, activation=’relu’))
+model.add(Dense(120, activation=’relu’))
+model.add(Dense(43, activation=’softmax’))
 
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
+#train our model
+history = model.fit(X_train_final, y_train, epochs=40, batch_size=1000)
+
+y_pred = model.predict(test_set)
+#Converting predictions to label
+pred = list()
+for i in range(len(y_pred)):
+    pred.append(np.argmax(y_pred[i]))
+#Converting one hot encoded test label to label
+test = list()
+for i in range(len(y_test)):
+    test.append(np.argmax(y_test[i]))
+
+#now evaluating our model against the test set
+
+from sklearn.metrics import accuracy_score
+a = accuracy_score(pred,test)
+print('Accuracy is:', a*100)
 
